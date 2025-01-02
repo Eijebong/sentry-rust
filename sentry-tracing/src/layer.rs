@@ -407,6 +407,11 @@ where
 
         let mut data = FieldVisitor::default();
         values.record(&mut data);
+        if let Some(otel_name) = data
+            .json_values
+            .remove("otel.name") {
+                span.set_op(otel_name.as_str().unwrap());
+        }
 
         let sentry_name = data
             .json_values

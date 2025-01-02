@@ -683,6 +683,15 @@ impl<'a> TransactionData<'a> {
 }
 
 impl Transaction {
+    /// Set the operation of this Transaction
+    pub fn set_op(&self, new_op: &str) {
+        let mut ctx = self.inner.lock().unwrap();
+        ctx.context.op = Some(new_op.to_string());
+        if ctx.transaction.is_some() {
+            ctx.transaction.as_mut().unwrap().name = Some(new_op.to_string());
+        }
+    }
+
     #[cfg(feature = "client")]
     fn new(client: Option<Arc<Client>>, ctx: TransactionContext) -> Self {
         let ((sampled, sample_rate), transaction) = match client.as_ref() {
@@ -795,12 +804,6 @@ impl Transaction {
     pub fn set_status(&self, status: protocol::SpanStatus) {
         let mut inner = self.inner.lock().unwrap();
         inner.context.status = Some(status);
-    }
-
-    /// Set the operation of the Transaction.
-    pub fn set_op(&self, op: &str) {
-        let mut inner = self.inner.lock().unwrap();
-        inner.context.op = Some(op.to_string());
     }
 
     /// Set the name of the Transaction.
