@@ -404,6 +404,14 @@ impl TransactionOrSpan {
         }
     }
 
+    /// Set the operation of the Transaction/Span.
+    pub fn set_op(&self, op: &str) {
+        match self {
+            TransactionOrSpan::Transaction(transaction) => transaction.set_op(op),
+            TransactionOrSpan::Span(_span) => {},
+        }
+    }
+
     /// Set the HTTP request information for this Transaction/Span.
     pub fn set_request(&self, request: protocol::Request) {
         match self {
@@ -560,6 +568,15 @@ impl<'a> TransactionData<'a> {
 }
 
 impl Transaction {
+    /// Set the operation of this Transaction
+    pub fn set_op(&self, new_op: &str) {
+        let mut ctx = self.inner.lock().unwrap();
+        ctx.context.op = Some(new_op.to_string());
+        if ctx.transaction.is_some() {
+            ctx.transaction.as_mut().unwrap().name = Some(new_op.to_string());
+        }
+    }
+
     #[cfg(feature = "client")]
     fn new(client: Option<Arc<Client>>, ctx: TransactionContext) -> Self {
         let (sampled, transaction) = match client.as_ref() {
