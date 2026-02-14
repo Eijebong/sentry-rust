@@ -108,7 +108,10 @@ impl Hub {
         let hub = other.as_ref();
         hub.inner.with(|stack| {
             let top = stack.top();
-            Hub::new(top.client.clone(), top.scope.clone())
+            let mut scope = (*top.scope).clone();
+            scope.breadcrumbs = Default::default();
+            scope.span = Default::default();
+            Hub::new(top.client.clone(), Arc::new(scope))
         })
     }
 
